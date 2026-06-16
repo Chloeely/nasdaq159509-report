@@ -21,19 +21,34 @@ def get_change(code):
     data = yf.download(
         code,
         period="5d",
-        progress=False
+        progress=False,
+        auto_adjust=False
     )
+
 
     close = data["Close"]
 
-    change = (
-        close.iloc[-1]
-        /
-        close.iloc[-2]
-        -1
-    )*100
 
-    return round(float(change),2)
+    # 兼容新版yfinance多层数据
+    if hasattr(close, "columns"):
+
+        close = close.iloc[:,0]
+
+
+    if len(close) < 2:
+
+        return 0
+
+
+    last = float(close.iloc[-1])
+
+    prev = float(close.iloc[-2])
+
+
+    change = (last / prev - 1) * 100
+
+
+    return round(change,2)
 
 
 
